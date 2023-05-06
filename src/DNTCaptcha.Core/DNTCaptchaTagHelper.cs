@@ -102,6 +102,7 @@ namespace DNTCaptcha.Core
             var number = _randomNumberProvider.NextNumber(Min, Max);
             var randomText = _captchaTextProvider(DisplayMode).GetText(number, Language);
             var encryptedText = _captchaProtectionProvider.Encrypt(randomText);
+            var encryptedNumber = _captchaProtectionProvider.Encrypt(number.ToString(CultureInfo.InvariantCulture));
 
             var captchaImage = getCaptchaImageTagBuilder(ViewContext, encryptedText);
             output.Content.AppendHtml(captchaImage);
@@ -113,7 +114,7 @@ namespace DNTCaptcha.Core
                 output.Content.AppendHtml(refreshButton);
             }
 
-            var hiddenInput = getHiddenInputTagBuilder(encryptedText);
+            var hiddenInput = getHiddenInputTagBuilder(encryptedNumber);
             output.Content.AppendHtml(hiddenInput);
 
             var textInput = getTextInputTagBuilder();

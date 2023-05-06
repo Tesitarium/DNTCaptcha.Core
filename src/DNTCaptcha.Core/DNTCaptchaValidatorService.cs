@@ -14,7 +14,6 @@ namespace DNTCaptcha.Core
         private readonly DNTCaptchaOptions _captchaOptions;
         private readonly ICaptchaCryptoProvider _captchaProtectionProvider;
         private readonly ICaptchaStorageProvider _captchaStorageProvider;
-        private readonly Func<DisplayMode, ICaptchaTextProvider> _captchaTextProvider;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ILogger<DNTCaptchaValidatorService> _logger;
 
@@ -26,7 +25,6 @@ namespace DNTCaptcha.Core
             ILogger<DNTCaptchaValidatorService> logger,
             ICaptchaCryptoProvider captchaProtectionProvider,
             ICaptchaStorageProvider captchaStorageProvider,
-            Func<DisplayMode, ICaptchaTextProvider> captchaTextProvider,
             IOptions<DNTCaptchaOptions> options
         )
         {
@@ -35,7 +33,6 @@ namespace DNTCaptcha.Core
                                          throw new ArgumentNullException(nameof(captchaProtectionProvider));
             _captchaStorageProvider =
                 captchaStorageProvider ?? throw new ArgumentNullException(nameof(captchaStorageProvider));
-            _captchaTextProvider = captchaTextProvider ?? throw new ArgumentNullException(nameof(captchaTextProvider));
             _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
             _captchaOptions = options == null ? throw new ArgumentNullException(nameof(options)) : options.Value;
         }
@@ -76,11 +73,7 @@ namespace DNTCaptcha.Core
 
             inputText = inputText.ToEnglishNumbers();
 
-            if (!long.TryParse(
-                               inputText,
-                               NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands,
-                               CultureInfo.InvariantCulture,
-                               out var inputNumber))
+            if (!TryParseNumber(inputText, out var inputNumber))
             {
                 _logger.LogDebug("inputText is not a number.");
                 return false;
@@ -88,11 +81,21 @@ namespace DNTCaptcha.Core
 
             var decryptedText = _captchaProtectionProvider.Decrypt(captchaText);
 
-            var numberToText = _captchaTextProvider(captchaGeneratorDisplayMode)
-                .GetText(inputNumber, captchaGeneratorLanguage);
-            if (decryptedText?.Equals(numberToText, StringComparison.Ordinal) != true)
+            if (string.IsNullOrEmpty(decryptedText))
             {
-                _logger.LogDebug($"{decryptedText} != {numberToText}");
+                _logger.LogDebug("Decrypted text is empty.");
+                return false;
+            }
+
+            if (!TryParseNumber(decryptedText, out var decryptedNumber))
+            {
+                _logger.LogDebug("Decrypted text is not a number.");
+                return false;
+            }
+
+            if (decryptedNumber != inputNumber)
+            {
+                _logger.LogDebug("{DecryptedNumber} != {InputNumber}", decryptedNumber, inputNumber);
                 return false;
             }
 
@@ -154,5 +157,15 @@ namespace DNTCaptcha.Core
 
         private static bool shouldValidate(HttpContext context) =>
             string.Equals("POST", context.Request.Method, StringComparison.OrdinalIgnoreCase);
+
+        private static bool TryParseNumber(string str, out long number)
+        {
+            return long.TryParse(
+                str,
+                NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture,
+                out number
+            );
+        }
     }
 }

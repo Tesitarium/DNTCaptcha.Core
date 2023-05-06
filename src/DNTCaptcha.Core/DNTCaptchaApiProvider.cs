@@ -63,6 +63,7 @@ namespace DNTCaptcha.Core
             var number = _randomNumberProvider.NextNumber(captchaAttributes.Min, captchaAttributes.Max);
             var randomText = _captchaTextProvider(captchaAttributes.DisplayMode).GetText(number, captchaAttributes.Language);
             var encryptedText = _captchaProtectionProvider.Encrypt(randomText);
+            var encryptedNumber = _captchaProtectionProvider.Encrypt(number.ToString(CultureInfo.InvariantCulture));
             var captchaImageUrl = getCaptchaImageUrl(captchaAttributes, encryptedText);
             var captchaDivId = Invariant($"{_captchaOptions.CaptchaClass}{Guid.NewGuid():N}{_randomNumberProvider.NextNumber(captchaAttributes.Min, captchaAttributes.Max)}");
             var cookieToken = $".{captchaDivId}";
@@ -74,7 +75,7 @@ namespace DNTCaptcha.Core
             {
                 DntCaptchaImgUrl = captchaImageUrl,
                 DntCaptchaId = captchaDivId,
-                DntCaptchaTextValue = encryptedText,
+                DntCaptchaTextValue = encryptedNumber,
                 DntCaptchaTokenValue = hiddenInputToken
             };
         }
