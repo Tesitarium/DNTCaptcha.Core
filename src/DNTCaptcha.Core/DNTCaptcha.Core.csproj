@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCaptcha.Core is a captcha generator and validator for ASP.NET Core applications.</Description>
-        <VersionPrefix>4.4.2</VersionPrefix>
+        <VersionPrefix>4.4.200</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <AssemblyName>DNTCaptcha.Core</AssemblyName>
-        <PackageId>DNTCaptcha.Core</PackageId>
+        <AssemblyName>Tesitarium.DNTCaptcha.Core</AssemblyName>
+        <PackageId>Tesitarium.DNTCaptcha.Core</PackageId>
         <PackageTags>MVC;aspnetcore;captcha;.NET Core</PackageTags>
         <PackageProjectUrl>https://github.com/VahidN/DNTCaptcha.Core</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
