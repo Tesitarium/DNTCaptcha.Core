@@ -7,22 +7,18 @@ namespace DNTCaptcha.Core;
 /// </summary>
 public class SumOfTwoNumbersToWordsProvider : ICaptchaTextProvider
 {
+    private readonly IRandomNumberProvider _randomNumberProvider;
     private readonly HumanReadableIntegerProvider _humanReadableIntegerProvider;
-    private readonly int _randomNumber;
 
     /// <summary>
     ///     SumOfTwoNumbersToWords Provider
     /// </summary>
     public SumOfTwoNumbersToWordsProvider(
         IRandomNumberProvider randomNumberProvider,
-        HumanReadableIntegerProvider humanReadableIntegerProvider)
+        HumanReadableIntegerProvider humanReadableIntegerProvider
+    )
     {
-        if (randomNumberProvider == null)
-        {
-            throw new ArgumentNullException(nameof(randomNumberProvider));
-        }
-
-        _randomNumber = randomNumberProvider.NextNumber(1, 7);
+        _randomNumberProvider = randomNumberProvider ?? throw new ArgumentNullException(nameof(randomNumberProvider));
         _humanReadableIntegerProvider = humanReadableIntegerProvider;
     }
 
@@ -32,8 +28,9 @@ public class SumOfTwoNumbersToWordsProvider : ICaptchaTextProvider
     /// <param name="number">input number</param>
     /// <param name="language">local language</param>
     /// <returns>the equivalent text</returns>
-    public string GetText(long number, Language language) =>
-        number > _randomNumber
-            ? $"{_humanReadableIntegerProvider.NumberToText(number - _randomNumber, language)} + {_humanReadableIntegerProvider.NumberToText(_randomNumber, language)}"
-            : $"{_humanReadableIntegerProvider.NumberToText(0, language)} + {_humanReadableIntegerProvider.NumberToText(number, language)}";
+    public string GetText(long number, Language language)
+    {
+        var randomNumber = number > 1 ? _randomNumberProvider.NextNumber(1, (int)Math.Min(number - 1, 9)) : 0;
+        return $"{_humanReadableIntegerProvider.NumberToText(number - randomNumber, language)} + {_humanReadableIntegerProvider.NumberToText(randomNumber, language)}";
+    }
 }
