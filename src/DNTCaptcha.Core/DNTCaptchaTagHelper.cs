@@ -100,9 +100,10 @@ namespace DNTCaptcha.Core
             output.TagMode = TagMode.StartTagAndEndTag;
 
             var number = _randomNumberProvider.NextNumber(Min, Max);
+            var numberString = number.ToString(CultureInfo.InvariantCulture);
             var randomText = _captchaTextProvider(DisplayMode).GetText(number, Language);
             var encryptedText = _captchaProtectionProvider.Encrypt(randomText);
-            var encryptedNumber = _captchaProtectionProvider.Encrypt(number.ToString(CultureInfo.InvariantCulture));
+            var encryptedNumber = _captchaProtectionProvider.Encrypt(numberString);
 
             var captchaImage = getCaptchaImageTagBuilder(ViewContext, encryptedText);
             output.Content.AppendHtml(captchaImage);
@@ -129,7 +130,7 @@ namespace DNTCaptcha.Core
             var dataAjaxBeginScript = getOnRefreshButtonDataAjaxBegin(ViewContext);
             output.Content.AppendHtml(dataAjaxBeginScript);
 
-            _captchaStorageProvider.Add(ViewContext.HttpContext, cookieToken, randomText);
+            _captchaStorageProvider.Add(ViewContext.HttpContext, cookieToken, numberString);
         }
 
         private void setUrlHelper(ViewContext viewContext)
